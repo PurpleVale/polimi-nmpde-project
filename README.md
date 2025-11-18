@@ -1,23 +1,45 @@
-### Organizing the source code
-Please place all your sources into the `src` folder.
+### Organization of the code
 
-Binary files must not be uploaded to the repository (including executables).
+The directory structure is as follows:
 
-Mesh files should not be uploaded to the repository. If applicable, upload `gmsh` scripts with suitable instructions to generate the meshes (and ideally a Makefile that runs those instructions). If not applicable, consider uploading the meshes to a different file sharing service, and providing a download link as part of the building and running instructions.
+Project/</br>
+├── bin/</br>
+├── build/</br>
+├── include/</br>
+├── lib/</br>
+├── src/</br>
+└── test/</br>
+
+- `bin` includes the binary output for all compilation
+- `build` contains the output of CMAKE
+- `incldue` contains all headers file
+- `lib` contains the compiled libraries
+- `src` contains all the C++ code to be compiled
+- `test` contains only C++ code to be used for testing
 
 ### Compiling
-To build the executable, make sure you have loaded the needed modules with
-```bash
-$ module load gcc-glibc dealii
+
+If the code is executed in AppTainer run the followings:
+
+```zsh
+module load gcc-glibc dealii
 ```
-Then run the following commands:
-```bash
-$ mkdir build
-$ cd build
-$ cmake ..
-$ make
+
+To compile we use CMAKE, from the `Project` directory run:
+
+```zsh
+cmake -S ./ -B ./build/
+cd build
+make
+cd ..
 ```
-The executable will be created into `build`, and can be executed through
-```bash
-$ ./executable-name
+
+If you are using Clion as IDE then the .idea folder should automatically load options to compile if the libraries are installed on the machine.
+
+### Executing
+
+The Executable are located in `Project/bin` without any exension, simply execute them from the `Project` directory
+
+```zsh
+./bin/binary_name
 ```

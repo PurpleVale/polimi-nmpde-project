@@ -2,20 +2,28 @@
 
 The directory structure is as follows:
 
-Project/</br>
-├── bin/</br>
-├── build/</br>
-├── include/</br>
-├── lib/</br>
-├── src/</br>
-└── test/</br>
+```
+./Project
+  ├── bin/
+  ├── build/
+  ├── docs/
+  ├── include/
+  ├── lib/
+  ├── src/
+  ├── test/
+  └── text/
+      ├── meshes/
+      └── outputs/
+```
 
 - `bin` includes the binary output for all compilation
 - `build` contains the output of CMAKE
-- `incldue` contains all headers file
+- `docs` contains Doxygen documentation
+- `include` contains all headers file
 - `lib` contains the compiled libraries
 - `src` contains all the C++ code to be compiled
 - `test` contains only C++ code to be used for testing
+- `text` contains all text files like meshes and outputs
 
 ### Compiling
 

@@ -1,5 +1,9 @@
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED "ON")
+set(CXX_STANDARD 20)
+set(CXX_STANDARD_REQUIRED "ON")
+
+message(STATUS "C++ Standard: ${CMAKE_CXX_STANDARD}")
 
 # Set default build type to Release.
 if(NOT CMAKE_BUILD_TYPE OR "${CMAKE_BUILD_TYPE}" STREQUAL "")
@@ -25,9 +29,8 @@ message(STATUS)
 include_directories(${Boost_INCLUDE_DIRS})
 
 # Locate deal.II and initialize its variables.
-find_package(deal.II REQUIRED
-  HINTS ${DEAL_II_DIR} $ENV{DEAL_II_DIR} $ENV{mkDealiiPrefix})
+find_package(deal.II 9.3.1 REQUIRED
+        HINTS ${DEAL_II_DIR} $ENV{DEAL_II_DIR} $ENV{mkDealiiPrefix})
 deal_ii_initialize_cached_variables()
-
 # Add useful compiler flags.
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wfloat-conversion -Wmissing-braces -Wnon-virtual-dtor -Wall")

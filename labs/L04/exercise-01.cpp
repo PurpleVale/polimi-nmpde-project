@@ -13,11 +13,11 @@ main(int argc, char *argv[])
     return 0.0;
   };
 
-  Heat problem(/*mesh_filename = */ "../mesh/mesh-cube-10.msh",
+  Heat problem(/*mesh_filename = */ "./text/meshes/mesh-cube-10.msh",
                /* degree = */ 1,
                /* T = */ 1.0,
-               /* theta = */ 0.0,
-               /* delta_t = */ 0.0025,
+               /* theta = */ 1.0,
+               /* delta_t = */ 0.05,
                mu,
                f);
 

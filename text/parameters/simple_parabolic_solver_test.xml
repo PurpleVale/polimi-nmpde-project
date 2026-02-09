@@ -2,14 +2,14 @@
 <ParameterHandler>
     <Files>
         <Mesh_20file>
-            <value>./text/meshes/mesh-cube-10.msh</value>
+            <value>./mesh.vtk</value>
             <default_value>./mesh.vtk</default_value>
             <documentation>A .vtk file containing a mesh</documentation>
             <pattern>5</pattern>
             <pattern_description>[FileName (Type: input)]</pattern_description>
         </Mesh_20file>
         <Output_20file>
-            <value>./text/outputs/test_para.vtu</value>
+            <value>./text/outputs/test_simle_para.vtu</value>
             <default_value>./output.vtk</default_value>
             <documentation>A .vtk file to save the solution to</documentation>
             <pattern>6</pattern>
@@ -25,7 +25,7 @@
             <pattern_description>[Selection Simplex ]</pattern_description>
         </Elements_20type>
         <Polynomial_20degree>
-            <value>1</value>
+            <value>2</value>
             <default_value>2</default_value>
             <documentation>The polynomial degree of the Elements</documentation>
             <pattern>18</pattern>
@@ -62,23 +62,35 @@
             <pattern_description>[Anything]</pattern_description>
         </Advection_20z>
         <Diffusion>
-            <value>0.1</value>
+            <value>1.0</value>
             <default_value>1.0</default_value>
             <documentation>Diffusion coefficient</documentation>
             <pattern>7</pattern>
             <pattern_description>[Anything]</pattern_description>
         </Diffusion>
-        <Dirichlet_20BC/>
-        <Dirichlet_20Tags/>
+        <Dirichlet_20BC>
+            <value>0.0,0.0,0.0,0.0</value>
+            <default_value>0.0</default_value>
+            <documentation>Dirichlet Boundary Condition</documentation>
+            <pattern>13</pattern>
+            <pattern_description>[List of &lt;[Anything]&gt; of length 0...4294967295 (inclusive)]</pattern_description>
+        </Dirichlet_20BC>
+        <Dirichlet_20Tags>
+            <value>0,1,2,3</value>
+            <default_value>0,1</default_value>
+            <documentation>The Tag of the boundaries on which to apply the Dirichlet condition</documentation>
+            <pattern>15</pattern>
+            <pattern_description>[List of &lt;[Integer range 0...9 (inclusive)]&gt; of length 0...4294967295 (inclusive)]</pattern_description>
+        </Dirichlet_20Tags>
         <Force>
-            <value>0.0</value>
+            <value>(1/18)*(18*pi*pi + 1)*sin(3*pi*x)*sin(3*pi*y)</value>
             <default_value>0.0</default_value>
             <documentation>Force term</documentation>
             <pattern>12</pattern>
             <pattern_description>[Anything]</pattern_description>
         </Force>
         <Initial_20State>
-            <value>x*(1-x)*y*(1-y)*z*(1-z)</value>
+            <value>0.0</value>
             <default_value>0.0</default_value>
             <documentation>The initial state of the system</documentation>
             <pattern>17</pattern>
@@ -116,7 +128,7 @@
             <pattern_description>[Selection Jacobi|Identity|ILU|ILUT|SSOR ]</pattern_description>
         </Preconditioner>
         <Residual_20tolerance>
-            <value>1e-06</value>
+            <value>1e-10</value>
             <default_value>1e-10</default_value>
             <documentation>Tolerance for the residual of the linear solver</documentation>
             <pattern>2</pattern>
@@ -130,7 +142,7 @@
             <pattern_description>[Selection CG|GMRES ]</pattern_description>
         </Solver_20type>
         <Tolerance>
-            <value>1e-16</value>
+            <value>1e-10</value>
             <default_value>1e-10</default_value>
             <documentation>Tolerance for the linear solver</documentation>
             <pattern>1</pattern>
@@ -153,7 +165,7 @@
             <pattern_description>[Double 0...1 (inclusive)]</pattern_description>
         </Theta>
         <Time_20step>
-            <value>0.05</value>
+            <value>0.005</value>
             <default_value>0.05</default_value>
             <documentation>The time step dt to use for the theta method</documentation>
             <pattern>22</pattern>

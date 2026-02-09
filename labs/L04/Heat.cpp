@@ -227,7 +227,7 @@ Heat::output() const
   const std::filesystem::path mesh_path(mesh_file_name);
   const std::string output_file_name = "output-" + mesh_path.stem().string();
 
-  data_out.write_vtu_with_pvtu_record(/* folder = */ "./",
+  data_out.write_vtu_with_pvtu_record(/* folder = */ "./text/outputs/",
                                       /* basename = */ output_file_name,
                                       /* index = */ timestep_number,
                                       MPI_COMM_WORLD);
@@ -240,7 +240,11 @@ Heat::run()
   {
     setup();
 
-    VectorTools::interpolate(dof_handler, FunctionU0(), solution_owned);
+    VectorTools::interpolate(
+        dof_handler,
+        FunctionU0(),
+        solution_owned
+    );
     solution = solution_owned;
 
     time            = 0.0;

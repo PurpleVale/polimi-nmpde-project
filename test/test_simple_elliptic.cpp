@@ -1,6 +1,6 @@
 #include <Generics.hpp>
 #include <PDEParamsHandler.hpp>
-#include <EllipticSolver.hpp>
+#include <SimpleGridEllipticSolver.hpp>
 
 int main(int argc , char** argv ) {
 
@@ -9,11 +9,9 @@ int main(int argc , char** argv ) {
     unsigned int mpi_rank(dealii::Utilities::MPI::this_mpi_process(MPI_COMM_WORLD));
     dealii::ConditionalOStream pcout(std::cout, mpi_rank == 0);
 
-    EllipticPDE::EllipticSolver<3> solver;
-    solver.print_parameters("./text/parameters/elliptic_solver.prm");
-    solver.print_editable_parameters("./text/parameters/elliptic_solver.xml");
+    EllipticPDE::SimpleGridEllipticSolver solver;
     pcout << "================ " << fmt::format("{:^45}","STARTING TEST") << " ================" <<std::endl;
-    double setup_time = solver.setup("./text/parameters/elliptic_solver_test.xml");
+    double setup_time = solver.setup("./text/parameters/simple_elliptic_solver_test.xml");
     double assemble_time = solver.assemble();
     double solve_time = solver.solve();
     solver.output();

@@ -19,8 +19,6 @@ namespace EllipticPDE {
         advection_c(dim),
         reaction_c(1),
         force_term(1),
-        dirichlet_bc(1),
-        neumann_bc(1),
         mpi_size(Utilities::MPI::n_mpi_processes(MPI_COMM_WORLD)),
         mpi_rank(Utilities::MPI::this_mpi_process(MPI_COMM_WORLD)),
         pcout(std::cout, mpi_rank == 0) {
@@ -38,12 +36,11 @@ namespace EllipticPDE {
         FunctionParser<dim> diffusion_c,
                             advection_c,
                             reaction_c,
-                            force_term,
-                            dirichlet_bc,
-                            neumann_bc;
+                            force_term;
         unsigned int max_iters,poly_deg;
-        String quad_type, fe_type, preconditioner;
-        std::vector<BoundaryIds> boundary_tags;
+        String fe_type, preconditioner;
+        std::vector<BoundaryIds> dirichlet_bc_tags, neumann_bc_tags;
+        std::vector<std::unique_ptr<FunctionParser<dim>>> dirichlet_bc, neumann_bc;
         double epsilon;
         double residual_tolerance;
         bool symmetric_solver;
@@ -157,14 +154,26 @@ namespace EllipticPDE {
             prm.declare_entry(
                 "Dirichlet BC",
                 "0.0",
-                Patterns::Anything(),
+                Patterns::List(Patterns::Anything(),0),
                 "Dirichlet Boundary Condition"
             );
             prm.declare_entry(
                 "Neumann BC",
                 "0.0",
-                Patterns::Anything(),
+                Patterns::List(Patterns::Anything(),0),
                 "Neumann Boundary Condition"
+            );
+            prm.declare_entry(
+                "Dirichlet Tags",
+                "0,1",
+                Patterns::List(Patterns::Integer(0,9),0),
+                "The Tag of the boundaries on which to apply the Dirichlet condition"
+            );
+            prm.declare_entry(
+                "Neumann Tags",
+                "0,1",
+                Patterns::List(Patterns::Integer(0,9),0),
+                "The Tag of the boundaries on which to apply the Neumann condition"
             );
         }
         prm.leave_subsection();
@@ -177,22 +186,10 @@ namespace EllipticPDE {
                 "The polynomial degree of the Elements"
             );
             prm.declare_entry(
-                "Quadrature",
-                "Gaussian",
-                Patterns::Selection("Gaussian"),
-                "The quadrature algorithm to be used"
-            );
-            prm.declare_entry(
                 "Elements type",
                 "Simplex",
-                Patterns::Selection("Simplex"),
+                Patterns::Selection("Simplex|Q"),
                 "The finite elements to be used"
-            );
-            prm.declare_entry(
-                "Dirichlet Tags",
-                "0,1",
-                Patterns::List(Patterns::Integer(0,9),0),
-                "The Tag of the boundaries on which to apply the Dirichlet condition"
             );
         }
         prm.leave_subsection();
@@ -214,10 +211,11 @@ namespace EllipticPDE {
         std::vector<String> advection_s(dim);
         String reaction_s;
         String force_term_s;
-        String dirichlet_bc_s;
-        String neumann_bc_s;
+        std::vector<String> dirichlet_bc_s;
+        std::vector<String> neumann_bc_s;
 
-        String tags;
+        std::vector<BoundaryIds> tags_d;
+        std::vector<BoundaryIds> tags_n;
 
         LOG_TITLE("Reading Parameter File")
         LOG_VAR("File Name", filename)
@@ -256,29 +254,47 @@ namespace EllipticPDE {
             }
             reaction_s = prm.get("Reaction");
             force_term_s = prm.get("Force");
-            dirichlet_bc_s = prm.get("Dirichlet BC");
-            neumann_bc_s = prm.get("Neumann BC");
+
+            String dirichlet_bc_curr, neumann_bc_curr;
+
+            std::stringstream dirichlet_bc_ss(prm.get("Dirichlet BC"));
+            std::stringstream dirichlet_tag_ss(prm.get("Dirichlet Tags"));
+            while (std::getline(dirichlet_bc_ss, dirichlet_bc_curr, ',')) {
+                dirichlet_bc_s.emplace_back(dirichlet_bc_curr);
+            }
+            while (std::getline(dirichlet_tag_ss, dirichlet_bc_curr, ',')) {
+                dirichlet_bc_tags.emplace_back(static_cast<BoundaryIds>(stoi(dirichlet_bc_curr)));
+            }
+            for (long unsigned int i = 0; i < dirichlet_bc_tags.size(); i++) {
+                dirichlet_bc.push_back(std::make_unique<FunctionParser<dim>>(1));
+                dirichlet_bc[i]->initialize(variables,dirichlet_bc_s[i],constants);
+            }
+            std::stringstream neumann_bc_ss(prm.get("Neumann BC"));
+            std::stringstream neumann_tag_ss(prm.get("Neumann Tags"));
+            while (std::getline(neumann_bc_ss, neumann_bc_curr, ',')) {
+                neumann_bc_s.emplace_back(neumann_bc_curr);
+            }
+            while (std::getline(neumann_tag_ss, neumann_bc_curr, ',')) {
+                neumann_bc_tags.emplace_back(static_cast<BoundaryIds>(stoi(neumann_bc_curr)));
+            }
+            for (long unsigned int i = 0; i < neumann_bc_tags.size(); i++) {
+                neumann_bc.push_back(std::make_unique<FunctionParser<dim>>(1));
+                neumann_bc[i]->initialize(variables,neumann_bc_s[i],constants);
+            }
 
             LOG_TITLE("Initializing Functions from strings")
+
             diffusion_c.initialize(variables,diffusion_s,constants);
             advection_c.initialize(variables,advection_s,constants);
             reaction_c.initialize(variables,reaction_s,constants);
             force_term.initialize(variables,force_term_s,constants);
-            dirichlet_bc.initialize(variables,dirichlet_bc_s,constants);
-            neumann_bc.initialize(variables,neumann_bc_s,constants);
         }
         prm.leave_subsection();
         prm.enter_subsection("Finite Elements");
         {
             LOG_TITLE("Getting Finite Elements Parameters")
             poly_deg = prm.get_integer("Polynomial degree");
-            quad_type = prm.get("Quadrature");
             fe_type = prm.get("Elements type");
-            tags = prm.get("Dirichlet Tags");
-            for (auto tag : tags) {
-                if (tag == ',') continue;
-                boundary_tags.emplace_back(static_cast<BoundaryIds>(tag-'0'));
-            }
         }
         prm.leave_subsection();
 
@@ -302,13 +318,14 @@ namespace EllipticPDE {
         }
         LOG_VAR("Reaction Coefficient",reaction_s)
         LOG_VAR("Force term", force_term_s)
-        LOG_VAR("Dirichlet BC", dirichlet_bc_s)
-        LOG_VAR("Neumann BC", neumann_bc_s)
+        for (long unsigned int i = 0; i < dirichlet_bc_tags.size(); i++) {
+            LOG(fmt::format("Dirichlet Boundary {}, Function: {}",dirichlet_bc_tags[i],dirichlet_bc_s[i]));
+        }
+        for (long unsigned int i = 0; i < neumann_bc_tags.size(); i++) {
+            LOG(fmt::format("Neumann Boundary {}, Function: {}",neumann_bc_tags[i],neumann_bc_s[i]));
+        }
         LOG_VAR("Polynomial Degree", poly_deg)
-        LOG_VAR("Quadrature Type",quad_type)
         LOG_VAR("Finite Elements Type",fe_type)
-        LOG_VAR("Tags for Dirichlet boundaries",tags)
-
         initialized = true;
     }
 
@@ -352,8 +369,6 @@ namespace ParabolicPDE {
         advection_c(dim),
         reaction_c(1),
         force_term(1,0.0),
-        dirichlet_bc(1,0.0),
-        neumann_bc(1,0.0),
         initial_state(1),
         mpi_size(Utilities::MPI::n_mpi_processes(MPI_COMM_WORLD)),
         mpi_rank(Utilities::MPI::this_mpi_process(MPI_COMM_WORLD)),
@@ -374,12 +389,11 @@ namespace ParabolicPDE {
                             advection_c,
                             reaction_c,
                             force_term,
-                            dirichlet_bc,
-                            neumann_bc,
                             initial_state;
         unsigned int max_iters,poly_deg;
-        String quad_type, fe_type, preconditioner;
-        std::vector<BoundaryIds> boundary_tags;
+        String fe_type, preconditioner;
+        std::vector<BoundaryIds> dirichlet_bc_tags, neumann_bc_tags;
+        std::vector<std::unique_ptr<FunctionParser<dim>>> dirichlet_bc, neumann_bc;
         double epsilon;
         double residual_tolerance;
         double theta,time_end,time_step;
@@ -495,14 +509,26 @@ namespace ParabolicPDE {
             prm.declare_entry(
                 "Dirichlet BC",
                 "0.0",
-                Patterns::Anything(),
+                Patterns::List(Patterns::Anything(),0),
                 "Dirichlet Boundary Condition"
             );
             prm.declare_entry(
                 "Neumann BC",
                 "0.0",
-                Patterns::Anything(),
+                Patterns::List(Patterns::Anything(),0),
                 "Neumann Boundary Condition"
+            );
+            prm.declare_entry(
+                "Dirichlet Tags",
+                "0,1",
+                Patterns::List(Patterns::Integer(0,9),0),
+                "The Tag of the boundaries on which to apply the Dirichlet condition"
+            );
+            prm.declare_entry(
+                "Neumann Tags",
+                "2,3",
+                Patterns::List(Patterns::Integer(0,9),0),
+                "The Tag of the boundaries on which to apply the Neumann condition"
             );
             prm.declare_entry(
                 "Initial State",
@@ -521,22 +547,10 @@ namespace ParabolicPDE {
                 "The polynomial degree of the Elements"
             );
             prm.declare_entry(
-                "Quadrature",
-                "Gaussian",
-                Patterns::Selection("Gaussian"),
-                "The quadrature algorithm to be used"
-            );
-            prm.declare_entry(
                 "Elements type",
                 "Simplex",
-                Patterns::Selection("Simplex"),
+                Patterns::Selection("Simplex|Q"),
                 "The finite elements to be used"
-            );
-            prm.declare_entry(
-                "Dirichlet Tags",
-                "0,1",
-                Patterns::List(Patterns::Integer(0,9),0),
-                "The Tag of the boundaries on which to apply the Dirichlet condition"
             );
         }
         prm.leave_subsection();
@@ -581,11 +595,12 @@ namespace ParabolicPDE {
         std::vector<String> advection_s(dim);
         String reaction_s;
         String force_term_s;
-        String dirichlet_bc_s;
-        String neumann_bc_s;
         String init_state_s;
+        std::vector<String> dirichlet_bc_s;
+        std::vector<String> neumann_bc_s;
 
-        String tags;
+        std::vector<BoundaryIds> tags_d;
+        std::vector<BoundaryIds> tags_n;
 
         LOG_TITLE("Reading Parameter File")
         LOG_VAR("File Name", filename)
@@ -624,8 +639,34 @@ namespace ParabolicPDE {
             }
             reaction_s = prm.get("Reaction");
             force_term_s = prm.get("Force");
-            dirichlet_bc_s = prm.get("Dirichlet BC");
-            neumann_bc_s = prm.get("Neumann BC");
+
+            String dirichlet_bc_curr, neumann_bc_curr;
+
+            std::stringstream dirichlet_bc_ss(prm.get("Dirichlet BC"));
+            std::stringstream dirichlet_tag_ss(prm.get("Dirichlet Tags"));
+            while (std::getline(dirichlet_bc_ss, dirichlet_bc_curr, ',')) {
+                dirichlet_bc_s.emplace_back(dirichlet_bc_curr);
+            }
+            while (std::getline(dirichlet_tag_ss, dirichlet_bc_curr, ',')) {
+                dirichlet_bc_tags.emplace_back(static_cast<BoundaryIds>(stoi(dirichlet_bc_curr)));
+            }
+            for (long unsigned int i = 0; i < dirichlet_bc_tags.size(); i++) {
+                dirichlet_bc.push_back(std::make_unique<FunctionParser<dim>>(1,0.0));
+                dirichlet_bc[i]->initialize(variables,dirichlet_bc_s[i],constants,true);
+            }
+            std::stringstream neumann_bc_ss(prm.get("Neumann BC"));
+            std::stringstream neumann_tag_ss(prm.get("Neumann Tags"));
+            while (std::getline(neumann_bc_ss, neumann_bc_curr, ',')) {
+                neumann_bc_s.emplace_back(neumann_bc_curr);
+            }
+            while (std::getline(neumann_tag_ss, neumann_bc_curr, ',')) {
+                neumann_bc_tags.emplace_back(static_cast<BoundaryIds>(stoi(neumann_bc_curr)));
+            }
+            for (long unsigned int i = 0; i < neumann_bc_tags.size(); i++) {
+                neumann_bc.push_back(std::make_unique<FunctionParser<dim>>(1,0.0));
+                neumann_bc[i]->initialize(variables,neumann_bc_s[i],constants,true);
+            }
+
             init_state_s = prm.get("Initial State");
 
             LOG_TITLE("Initializing Functions from strings")
@@ -633,8 +674,6 @@ namespace ParabolicPDE {
             advection_c.initialize(variables_no_time,advection_s,constants);
             reaction_c.initialize(variables_no_time,reaction_s,constants);
             force_term.initialize(variables,force_term_s,constants,true);
-            dirichlet_bc.initialize(variables,dirichlet_bc_s,constants,true);
-            neumann_bc.initialize(variables,neumann_bc_s,constants,true);
             initial_state.initialize(variables_no_time,init_state_s,constants);
         }
         prm.leave_subsection();
@@ -642,13 +681,7 @@ namespace ParabolicPDE {
         {
             LOG_TITLE("Getting Finite Elements Parameters")
             poly_deg = prm.get_integer("Polynomial degree");
-            quad_type = prm.get("Quadrature");
             fe_type = prm.get("Elements type");
-            tags = prm.get("Dirichlet Tags");
-            for (auto tag : tags) {
-                if (tag == ',') continue;
-                boundary_tags.emplace_back(static_cast<BoundaryIds>(tag-'0'));
-            }
         }
         prm.leave_subsection();
         prm.enter_subsection("Time Parameters");
@@ -680,12 +713,15 @@ namespace ParabolicPDE {
         }
         LOG_VAR("Reaction Coefficient",reaction_s)
         LOG_VAR("Force term", force_term_s)
-        LOG_VAR("Dirichlet BC", dirichlet_bc_s)
-        LOG_VAR("Neumann BC", neumann_bc_s)
+        for (long unsigned int i = 0; i < dirichlet_bc_tags.size(); i++) {
+            LOG(fmt::format("Dirichlet Boundary {}, Function: {}",dirichlet_bc_tags[i],dirichlet_bc_s[i]));
+        }
+        for (long unsigned int i = 0; i < neumann_bc_tags.size(); i++) {
+            LOG(fmt::format("Neumann Boundary {}, Function: {}",neumann_bc_tags[i],neumann_bc_s[i]));
+        }
+        LOG_VAR("Initial state function", init_state_s)
         LOG_VAR("Polynomial Degree", poly_deg)
-        LOG_VAR("Quadrature Type",quad_type)
         LOG_VAR("Finite Elements Type",fe_type)
-        LOG_VAR("Tags for Dirichlet boundaries",tags)
         LOG_VAR("Time limit of the PDE",time_end)
         LOG_VAR("Time step",time_step)
         LOG_VAR("Theta Method Parameter",theta)

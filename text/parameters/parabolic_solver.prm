@@ -10,9 +10,6 @@ end
 
 
 subsection Finite Elements
-  # The Tag of the boundaries on which to apply the Dirichlet condition
-  set Dirichlet Tags    = 0,1
-
   # The finite elements to be used
   set Elements type     = Simplex
 
@@ -26,31 +23,37 @@ end
 
 subsection Functions
   # Advection x coefficient
-  set Advection x   = 0.0
+  set Advection x    = 0.0
 
   # Advection y coefficient
-  set Advection y   = 0.0
+  set Advection y    = 0.0
 
   # Advection z coefficient
-  set Advection z   = 0.0
+  set Advection z    = 0.0
 
   # Diffusion coefficient
-  set Diffusion     = 1.0
+  set Diffusion      = 1.0
 
   # Dirichlet Boundary Condition
-  set Dirichlet BC  = 0.0
+  set Dirichlet BC   = 0.0
+
+  # The Tag of the boundaries on which to apply the Dirichlet condition
+  set Dirichlet Tags = 0,1
 
   # Force term
-  set Force         = 0.0
+  set Force          = 0.0
 
   # The initial state of the system
-  set Initial State = 0.0
+  set Initial State  = 0.0
 
   # Neumann Boundary Condition
-  set Neumann BC    = 0.0
+  set Neumann BC     = 0.0
+
+  # The Tag of the boundaries on which to apply the Neumann condition
+  set Neumann Tags   = 2,3
 
   # Reaction coefficient
-  set Reaction      = 0.0
+  set Reaction       = 0.0
 end
 
 

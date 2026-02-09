@@ -7,8 +7,9 @@
 namespace ParabolicPDE{
     using namespace dealii;
 
-    template<int dim>
-    class ParabolicSolver : public ParabolicParamHandler<dim>{
+    constexpr auto dim = 2;
+    constexpr auto N_elm = 40;
+    class SimpleGridParabolicSolver : public ParabolicParamHandler<dim>{
 
     public:
         using String = std::string;
@@ -16,7 +17,7 @@ namespace ParabolicPDE{
         using BoundaryIds  = types::boundary_id;
         using BoundaryFunctionMap = std::map<types::boundary_id, const Function<dim> *>;
 
-        ParabolicSolver() :
+        SimpleGridParabolicSolver() :
             ParabolicParamHandler<dim>(),
             mesh(MPI_COMM_WORLD),
             mpi_size(Utilities::MPI::n_mpi_processes(MPI_COMM_WORLD)),
@@ -61,17 +62,12 @@ namespace ParabolicPDE{
 
     };
 
-    template<int dim>
-    double ParabolicSolver<dim>::setup(const String parameter_filename) {
+    inline double SimpleGridParabolicSolver::setup(const String parameter_filename) {
         this->init(parameter_filename);
 
         LOG_TITLE("Reading Grid Serially")
         Triangulation<dim> non_parallel_mesh;
-        GridIn<dim> grid_input;
-        grid_input.attach_triangulation(non_parallel_mesh);
-
-        std::ifstream mesh_file(this->mesh_filename);
-        grid_input.read_msh(mesh_file);
+        GridGenerator::subdivided_hyper_cube(non_parallel_mesh, N_elm, 0.0, 1.0, true);
 
         LOG_VAR("Cells",non_parallel_mesh.n_active_cells())
 
@@ -138,8 +134,7 @@ namespace ParabolicPDE{
         return timer.wall_time();
     }
 
-    template<int dim>
-    double ParabolicSolver<dim>::assemble() {
+    inline double SimpleGridParabolicSolver::assemble() {
         Timer timer;
         timer.start();
 
@@ -323,8 +318,7 @@ namespace ParabolicPDE{
         return timer.wall_time();
     }
 
-    template<int dim>
-    double ParabolicSolver<dim>::assemble_matrix() {
+    inline double SimpleGridParabolicSolver::assemble_matrix() {
         Timer timer;
         timer.start();
 
@@ -417,8 +411,7 @@ namespace ParabolicPDE{
         return timer.wall_time();
     }
 
-    template<int dim>
-    double ParabolicSolver<dim>::assemble_rhs() {
+    inline double SimpleGridParabolicSolver::assemble_rhs() {
         Timer timer;
         timer.start();
 
@@ -543,6 +536,7 @@ namespace ParabolicPDE{
         LOG_TITLE("Synchronizing computation of RHS")
         rhs.compress(VectorOperation::add);
 
+
         LOG_TITLE("Applying Boundary Conditions")
         // boundary_vals(loc_index) == phi(loc_index)
         BoundaryMap boundary_vals;
@@ -571,8 +565,7 @@ namespace ParabolicPDE{
         return timer.wall_time();
     }
 
-    template<int dim>
-    double ParabolicSolver<dim>::solve() {
+    inline double SimpleGridParabolicSolver::solve() {
         Timer timer;
         timer.start();
 
@@ -667,8 +660,7 @@ namespace ParabolicPDE{
         return timer.wall_time();
     }
 
-    template<int dim>
-    void ParabolicSolver<dim>::output() const {
+    inline void SimpleGridParabolicSolver::output() const {
         LOG_TITLE("Preparing output structure")
         DataOut<dim> d_o;
         // add ghost solution
@@ -700,8 +692,7 @@ namespace ParabolicPDE{
         LOG_VAR("Logs written to",out_file)
     }
 
-    template<int dim>
-    double ParabolicSolver<dim>::run(const String &parameter_filename) {
+    inline double SimpleGridParabolicSolver::run(const String &parameter_filename) {
         Timer timer;
         timer.start();
 
@@ -751,8 +742,7 @@ namespace ParabolicPDE{
         return timer.wall_time();
     }
 
-    template<int dim>
-    double ParabolicSolver<dim>::compare_solution(
+    inline double SimpleGridParabolicSolver::compare_solution(
         const VectorTools::NormType &norm_type,
         const Function<dim> &exact
     ) const {

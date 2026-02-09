@@ -28,6 +28,14 @@ target_link_libraries(test_ell fmt::fmt)
 add_executable(test_par test/test_parabolic.cpp)
 deal_ii_setup_target(test_par)
 target_link_libraries(test_par fmt::fmt)
+
+add_executable(test_s_ell test/test_simple_elliptic.cpp)
+deal_ii_setup_target(test_s_ell)
+target_link_libraries(test_s_ell fmt::fmt)
+
+add_executable(test_s_par test/test_simple_parabolic.cpp)
+deal_ii_setup_target(test_s_par)
+target_link_libraries(test_s_par fmt::fmt)
 ##############################################
 #              My Executables                #
 ##############################################

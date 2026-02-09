@@ -7,8 +7,9 @@
 namespace EllipticPDE{
     using namespace dealii;
 
-    template<int dim>
-    class EllipticSolver : public EllipticParamHandler<dim>{
+    constexpr auto dim = 1;
+    constexpr auto N_elm = 40;
+    class SimpleGridEllipticSolver : public EllipticParamHandler<dim>{
 
     public:
         using String = std::string;
@@ -16,7 +17,7 @@ namespace EllipticPDE{
         using BoundaryIds  = types::boundary_id;
         using BoundaryFunctionMap = std::map<types::boundary_id, const Function<dim> *>;
 
-        EllipticSolver() :
+        SimpleGridEllipticSolver() :
             EllipticParamHandler<dim>(),
             mesh(MPI_COMM_WORLD),
             mpi_size(Utilities::MPI::n_mpi_processes(MPI_COMM_WORLD)),
@@ -53,17 +54,12 @@ namespace EllipticPDE{
 
     };
 
-    template<int dim>
-    double EllipticSolver<dim>::setup(String parameter_filename) {
+    inline double SimpleGridEllipticSolver::setup(String parameter_filename) {
         this->init(parameter_filename);
 
-        LOG_TITLE("Reading Grid Serially")
+        LOG_TITLE("Creating Grid")
         Triangulation<dim> non_parallel_mesh;
-        GridIn<dim> grid_input;
-        grid_input.attach_triangulation(non_parallel_mesh);
-
-        std::ifstream mesh_file(this->mesh_filename);
-        grid_input.read_msh(mesh_file);
+        GridGenerator::subdivided_hyper_cube(non_parallel_mesh, N_elm, 0.0, 1.0, true);
 
         LOG_VAR("Cells",non_parallel_mesh.n_active_cells())
 
@@ -128,8 +124,7 @@ namespace EllipticPDE{
         return timer.wall_time();
     }
 
-    template<int dim>
-    double EllipticSolver<dim>::assemble() {
+    inline double SimpleGridEllipticSolver::assemble() {
         Timer timer;
         timer.start();
 
@@ -270,8 +265,7 @@ namespace EllipticPDE{
         return timer.wall_time();
     }
 
-    template<int dim>
-    double EllipticSolver<dim>::solve() {
+    inline double SimpleGridEllipticSolver::solve() {
         Timer timer;
         timer.start();
 
@@ -366,8 +360,7 @@ namespace EllipticPDE{
         return timer.wall_time();
     }
 
-    template<int dim>
-    void EllipticSolver<dim>::output() const {
+    inline void SimpleGridEllipticSolver::output() const {
 
         LOG_TITLE("Synchronizing with other processors")
         const IndexSet locally_relevant_dofs = DoFTools::extract_locally_relevant_dofs(dof_handler);
@@ -410,8 +403,7 @@ namespace EllipticPDE{
         LOG_VAR("Logs written to",out_file)
     }
 
-    template<int dim>
-    double EllipticSolver<dim>::compare_solution(
+    inline double SimpleGridEllipticSolver::compare_solution(
         const VectorTools::NormType &norm_type,
         const Function<dim> &exact
     ) const {

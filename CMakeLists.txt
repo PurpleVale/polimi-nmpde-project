@@ -21,10 +21,13 @@ find_package(fmt)
 ##############################################
 #                 My Tests                   #
 ##############################################
-add_executable(test1 test/test1.cpp)
-deal_ii_setup_target(test1)
-target_link_libraries(test1 fmt::fmt)
+add_executable(test_ell test/test_elliptic.cpp)
+deal_ii_setup_target(test_ell)
+target_link_libraries(test_ell fmt::fmt)
 
+add_executable(test_par test/test_parabolic.cpp)
+deal_ii_setup_target(test_par)
+target_link_libraries(test_par fmt::fmt)
 ##############################################
 #              My Executables                #
 ##############################################

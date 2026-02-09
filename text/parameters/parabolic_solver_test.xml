@@ -2,14 +2,14 @@
 <ParameterHandler>
     <Files>
         <Mesh_20file>
-            <value>./text/meshes/mesh-cube-20.msh</value>
+            <value>./text/meshes/mesh-cube-10.msh</value>
             <default_value>./mesh.vtk</default_value>
             <documentation>A .vtk file containing a mesh</documentation>
             <pattern>5</pattern>
             <pattern_description>[FileName (Type: input)]</pattern_description>
         </Mesh_20file>
         <Output_20file>
-            <value>./text/outputs/test1_out.vtk</value>
+            <value>./text/outputs/test_para.vtu</value>
             <default_value>./output.vtk</default_value>
             <documentation>A .vtk file to save the solution to</documentation>
             <pattern>6</pattern>
@@ -17,32 +17,26 @@
         </Output_20file>
     </Files>
     <Finite_20Elements>
-        <Dirichlet_20Tags>
-            <value>0,1,2,3,4,5</value>
-            <default_value>0,1</default_value>
-            <documentation>The Tag of the boundaries on which to apply the Dirichlet condition</documentation>
-            <pattern>18</pattern>
-            <pattern_description>[List of &lt;[Integer range 0...9 (inclusive)]&gt; of length 1...4294967295 (inclusive)]</pattern_description>
-        </Dirichlet_20Tags>
+        <Dirichlet_20Tags/>
         <Elements_20type>
             <value>Simplex</value>
             <default_value>Simplex</default_value>
             <documentation>The finite elements to be used</documentation>
-            <pattern>17</pattern>
+            <pattern>18</pattern>
             <pattern_description>[Selection Simplex ]</pattern_description>
         </Elements_20type>
         <Polynomial_20degree>
-            <value>2</value>
+            <value>1</value>
             <default_value>2</default_value>
             <documentation>The polynomial degree of the Elements</documentation>
-            <pattern>15</pattern>
+            <pattern>16</pattern>
             <pattern_description>[Integer range 1...7 (inclusive)]</pattern_description>
         </Polynomial_20degree>
         <Quadrature>
             <value>Gaussian</value>
             <default_value>Gaussian</default_value>
             <documentation>The quadrature algorithm to be used</documentation>
-            <pattern>16</pattern>
+            <pattern>17</pattern>
             <pattern_description>[Selection Gaussian ]</pattern_description>
         </Quadrature>
     </Finite_20Elements>
@@ -69,7 +63,7 @@
             <pattern_description>[Anything]</pattern_description>
         </Advection_20z>
         <Diffusion>
-            <value>if(x&gt;0.5,100.0,1.0)</value>
+            <value>0.1</value>
             <default_value>1.0</default_value>
             <documentation>Diffusion coefficient</documentation>
             <pattern>7</pattern>
@@ -83,12 +77,19 @@
             <pattern_description>[Anything]</pattern_description>
         </Dirichlet_20BC>
         <Force>
-            <value>1.0</value>
+            <value>0.0</value>
             <default_value>0.0</default_value>
             <documentation>Force term</documentation>
             <pattern>12</pattern>
             <pattern_description>[Anything]</pattern_description>
         </Force>
+        <Initial_20State>
+            <value>x*(x-1)*y*(y-1)*z*(z-1)</value>
+            <default_value>0.0</default_value>
+            <documentation>The initial state of the system</documentation>
+            <pattern>15</pattern>
+            <pattern_description>[Anything]</pattern_description>
+        </Initial_20State>
         <Neumann_20BC>
             <value>0.0</value>
             <default_value>0.0</default_value>
@@ -97,7 +98,7 @@
             <pattern_description>[Anything]</pattern_description>
         </Neumann_20BC>
         <Reaction>
-            <value>1.0 </value>
+            <value>0.0</value>
             <default_value>0.0</default_value>
             <documentation>Reaction coefficient</documentation>
             <pattern>11</pattern>
@@ -106,7 +107,7 @@
     </Functions>
     <Solver>
         <Max_20iters>
-            <value>10000</value>
+            <value>1000</value>
             <default_value>1000</default_value>
             <documentation>Max number of iters for linear solver</documentation>
             <pattern>0</pattern>
@@ -117,7 +118,7 @@
             <default_value>Identity</default_value>
             <documentation>The type of preconditioner default is none</documentation>
             <pattern>4</pattern>
-            <pattern_description>[Selection Jacobi|Identity|SSOR ]</pattern_description>
+            <pattern_description>[Selection Jacobi|Identity|ILU|ILUT|SSOR ]</pattern_description>
         </Preconditioner>
         <Residual_20tolerance>
             <value>1e-10</value>
@@ -141,4 +142,27 @@
             <pattern_description>[Double -MAX_DOUBLE...MAX_DOUBLE (inclusive)]</pattern_description>
         </Tolerance>
     </Solver>
+    <Time_20Parameters>
+        <Final_20time>
+            <value>1</value>
+            <default_value>1.0</default_value>
+            <documentation>The T st the pde has domain Omega times (0,T)</documentation>
+            <pattern>20</pattern>
+            <pattern_description>[Double -MAX_DOUBLE...MAX_DOUBLE (inclusive)]</pattern_description>
+        </Final_20time>
+        <Theta>
+            <value>1.0</value>
+            <default_value>0.5</default_value>
+            <documentation>The theta parameter for the theta method</documentation>
+            <pattern>22</pattern>
+            <pattern_description>[Double 0...1 (inclusive)]</pattern_description>
+        </Theta>
+        <Time_20step>
+            <value>0.05</value>
+            <default_value>0.05</default_value>
+            <documentation>The time step dt to use for the theta method</documentation>
+            <pattern>21</pattern>
+            <pattern_description>[Double -MAX_DOUBLE...MAX_DOUBLE (inclusive)]</pattern_description>
+        </Time_20step>
+    </Time_20Parameters>
 </ParameterHandler>

@@ -1,0 +1,86 @@
+# Listing of Parameters
+# ---------------------
+subsection Files
+  # A .vtk file containing a mesh
+  set Mesh file   = ./mesh.vtk
+
+  # A .vtk file to save the solution to
+  set Output file = ./output.vtk
+end
+
+
+subsection Finite Elements
+  # The Tag of the boundaries on which to apply the Dirichlet condition
+  set Dirichlet Tags    = 0,1
+
+  # The finite elements to be used
+  set Elements type     = Simplex
+
+  # The polynomial degree of the Elements
+  set Polynomial degree = 2
+
+  # The quadrature algorithm to be used
+  set Quadrature        = Gaussian
+end
+
+
+subsection Functions
+  # Advection x coefficient
+  set Advection x   = 0.0
+
+  # Advection y coefficient
+  set Advection y   = 0.0
+
+  # Advection z coefficient
+  set Advection z   = 0.0
+
+  # Diffusion coefficient
+  set Diffusion     = 1.0
+
+  # Dirichlet Boundary Condition
+  set Dirichlet BC  = 0.0
+
+  # Force term
+  set Force         = 0.0
+
+  # The initial state of the system
+  set Initial State = 0.0
+
+  # Neumann Boundary Condition
+  set Neumann BC    = 0.0
+
+  # Reaction coefficient
+  set Reaction      = 0.0
+end
+
+
+subsection Solver
+  # Max number of iters for linear solver
+  set Max iters          = 1000
+
+  # The type of preconditioner default is none
+  set Preconditioner     = Identity
+
+  # Tolerance for the residual of the linear solver
+  set Residual tolerance = 1e-10
+
+  # The solver to use
+  set Solver type        = CG
+
+  # Tolerance for the linear solver
+  set Tolerance          = 1e-10
+end
+
+
+subsection Time Parameters
+  # The T st the pde has domain Omega times (0,T)
+  set Final time = 1.0
+
+  # The theta parameter for the theta method
+  set Theta      = 0.5
+
+  # The time step dt to use for the theta method
+  set Time step  = 0.05
+end
+
+

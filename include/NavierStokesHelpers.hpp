@@ -349,7 +349,6 @@ namespace NavierStokesPDE {
 
     }
 
-
 }
 
 #endif //NNPDE_PROJECT_NAVIERSTOKESHELPERS_HPP

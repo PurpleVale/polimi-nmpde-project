@@ -7,9 +7,8 @@
 namespace EllipticPDE{
     using namespace dealii;
 
-    constexpr auto dim = 1;
-    constexpr auto N_elm = 50;
-    class SimpleGridEllipticSolver : public EllipticParamHandler<dim>{
+    template<int dim>
+    class DNEllipticSolver : public EllipticParamHandler<dim>{
 
     public:
         using String = std::string;
@@ -17,7 +16,7 @@ namespace EllipticPDE{
         using BoundaryIds  = types::boundary_id;
         using BoundaryFunctionMap = std::map<types::boundary_id, const Function<dim> *>;
 
-        SimpleGridEllipticSolver() :
+        DNEllipticSolver() :
             EllipticParamHandler<dim>(),
             mesh(MPI_COMM_WORLD),
             mpi_size(Utilities::MPI::n_mpi_processes(MPI_COMM_WORLD)),
@@ -55,5 +54,9 @@ namespace EllipticPDE{
     };
 
 }
+
+template class EllipticPDE::DNEllipticSolver<1>;
+template class EllipticPDE::DNEllipticSolver<2>;
+template class EllipticPDE::DNEllipticSolver<3>;
 
 #endif //NNPDE_STUDY_ELLIPTIC_SOLVER_HPP

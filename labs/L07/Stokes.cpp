@@ -295,12 +295,13 @@ Stokes::assemble()
                                              mask_velocity);
 
     MatrixTools::apply_boundary_values(
-      boundary_values, system_matrix, solution_owned, system_rhs, false);
+      boundary_values,
+      system_matrix,
+      solution_owned, system_rhs, false);
   }
 }
 
-void
-Stokes::solve()
+void Stokes::solve()
 {
   pcout << "===============================================" << std::endl;
 
@@ -350,7 +351,7 @@ Stokes::output()
   data_out.build_patches();
 
   const std::string output_file_name = "output-stokes";
-  data_out.write_vtu_with_pvtu_record("./",
+  data_out.write_vtu_with_pvtu_record("./text/outputs/",
                                       output_file_name,
                                       0,
                                       MPI_COMM_WORLD);

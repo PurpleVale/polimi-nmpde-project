@@ -15,9 +15,6 @@ subsection Finite Elements
 
   # The polynomial degree of the Elements
   set Polynomial degree = 2
-
-  # The quadrature algorithm to be used
-  set Quadrature        = Gaussian
 end
 
 

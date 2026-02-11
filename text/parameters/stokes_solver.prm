@@ -1,0 +1,38 @@
+# Listing of Parameters
+# ---------------------
+subsection Coefficients
+  # The Kinematic Viscosity Coefficient (nu)
+  set Kinematic Viscosity = 1.0
+
+  # The coefficient sigma
+  set Sigma               = 0.0
+end
+
+
+subsection Files
+  # A .vtk file containing a mesh
+  set Mesh file   = ./mesh.vtk
+
+  # A .vtk file to save the solution to
+  set Output file = ./output.vtk
+end
+
+
+subsection Finite Elements
+  # The polynomial degree of the Elements of the pressure
+  set Polynomial degree pressure = 1
+
+  # The polynomial degree of the Elements of the velocity
+  set Polynomial degree velocity = 2
+end
+
+
+subsection Solver
+  # Max number of iters for linear solver
+  set Max iters = 1000
+
+  # Tolerance for the linear solver
+  set Tolerance = 1e-10
+end
+
+

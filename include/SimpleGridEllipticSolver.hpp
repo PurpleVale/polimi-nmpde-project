@@ -7,8 +7,8 @@
 namespace EllipticPDE{
     using namespace dealii;
 
-    constexpr auto dim = 1;
-    constexpr auto N_elm = 40;
+    constexpr auto dim = 2;
+    constexpr auto N_elm = 50;
     class SimpleGridEllipticSolver : public EllipticParamHandler<dim>{
 
     public:

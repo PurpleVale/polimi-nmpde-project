@@ -11,7 +11,7 @@ int main(int argc , char** argv ) {
 
     EllipticPDE::SimpleGridEllipticSolver solver;
     pcout << "================ " << fmt::format("{:^45}","STARTING TEST") << " ================" <<std::endl;
-    double setup_time = solver.setup("./text/parameters/simple_elliptic_solver_test.xml");
+    double setup_time = solver.setup("./text/parameters/test_params/simple_elliptic_solver_test.xml");
     double assemble_time = solver.assemble();
     double solve_time = solver.solve();
     solver.output();

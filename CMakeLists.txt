@@ -29,6 +29,14 @@ add_executable(test_par test/test_parabolic.cpp)
 deal_ii_setup_target(test_par)
 target_link_libraries(test_par fmt::fmt)
 
+add_executable(test_stokes test/test_stokes.cpp)
+deal_ii_setup_target(test_stokes)
+target_link_libraries(test_stokes fmt::fmt)
+
+add_executable(test_unsteady test/test_unsteady.cpp)
+deal_ii_setup_target(test_unsteady)
+target_link_libraries(test_unsteady fmt::fmt)
+
 add_executable(test_s_ell test/test_simple_elliptic.cpp)
 deal_ii_setup_target(test_s_ell)
 target_link_libraries(test_s_ell fmt::fmt)

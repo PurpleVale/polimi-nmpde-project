@@ -684,7 +684,6 @@ namespace ParabolicPDE{
         LOG_TITLE("Finalizing output structure")
         d_o.build_patches();
 
-
         const std::filesystem::path mesh_path(this->output_filename);
         String output_dir = mesh_path.parent_path().string();
         String output_name = mesh_path.stem().string();
@@ -704,6 +703,8 @@ namespace ParabolicPDE{
     double ParabolicSolver<dim>::run(const String &parameter_filename) {
         Timer timer;
         timer.start();
+
+        const bool print_iter = true;
 
         auto set_up_time = setup(parameter_filename);
         LOG_ANY("Setup time: {:0.4f}s", set_up_time);
@@ -735,8 +736,8 @@ namespace ParabolicPDE{
         while (curr_time < (T - 0.5*dt)) {
             curr_time += dt;
             ++curr_time_step;
-
-            LOG_VAR("Starting Time step", curr_time_step)
+            if (print_iter)
+                pcout << fmt::format("{:<90}",fmt::format("{} == {}/{}","Starting Time step", curr_time_step,expected_steps)) << std::endl;
             assemble_time = assemble_rhs();
             LOG_ANY("RHS assemble time: {:0.4f}s", assemble_time);
             double solve_time = solve();

@@ -21,6 +21,7 @@ add_library(param_handler
         src/EllipticParamsHandler.cpp
         src/NavierStokesParamsHandler.cpp
         src/ParabolicParamsHandler.cpp
+        src/DNParamHandler.cpp
         include/PDEParamsHandler.hpp
 )
 deal_ii_setup_target(param_handler)
@@ -49,6 +50,11 @@ target_link_libraries(stokes_solver fmt::fmt param_handler)
 add_library(u_stokes_solver src/UnsteadyStokesSolver.cpp include/UnsteadyStokesSolver.hpp include/NavierStokesHelpers.hpp)
 deal_ii_setup_target(u_stokes_solver)
 target_link_libraries(u_stokes_solver fmt::fmt param_handler)
+
+add_library(dn_solver src/DNSolver.cpp src/DNEllipticSolver.cpp include/DNSolver.hpp include/DNEllipticSolver.hpp)
+deal_ii_setup_target(dn_solver)
+target_link_libraries(dn_solver fmt::fmt param_handler)
+
 ##############################################
 #                 My Tests                   #
 ##############################################
@@ -67,6 +73,10 @@ target_link_libraries(test_stokes fmt::fmt param_handler stokes_solver)
 add_executable(test_unsteady test/test_unsteady.cpp)
 deal_ii_setup_target(test_unsteady)
 target_link_libraries(test_unsteady fmt::fmt param_handler u_stokes_solver)
+
+add_executable(test_dn test/test_dn.cpp)
+deal_ii_setup_target(test_dn)
+target_link_libraries(test_dn fmt::fmt param_handler dn_solver)
 
 add_executable(test_s_ell test/test_simple_elliptic.cpp)
 deal_ii_setup_target(test_s_ell)

@@ -59,10 +59,49 @@ namespace EllipticPDE {
 
     };
 
+    template <int dim>
+    class DNParamHandler {
+    public:
+        using String = std::string;
+        using ConstantMap = std::map<String, double>;
+        using BoundaryIds  = types::boundary_id;
+
+        DNParamHandler() :
+        mpi_size(Utilities::MPI::n_mpi_processes(MPI_COMM_WORLD)),
+        mpi_rank(Utilities::MPI::this_mpi_process(MPI_COMM_WORLD)),
+        pcout(std::cout, mpi_rank == 0)
+        {};
+        ~DNParamHandler() = default;
+
+        void declare_parameters();
+        void init(const String &filename);
+        void print_parameters(const String &filename);
+        void print_editable_parameters(const String &filename);
+
+        String dirichlet_prm_file,neumann_prm_file;
+        double relaxation;
+        unsigned int max_iters;
+        double tolerance;
+
+        ParameterHandler prm;
+        bool param_initialized = false;
+        bool initialized = false;
+
+        private:
+        void print_parameters_as(const String &filename,ParameterHandler::OutputStyle style);
+
+        const unsigned int mpi_size;
+        const unsigned int mpi_rank;
+        ConditionalOStream pcout;
+    };
+
 }
 template class EllipticPDE::EllipticParamHandler<1>;
 template class EllipticPDE::EllipticParamHandler<2>;
 template class EllipticPDE::EllipticParamHandler<3>;
+template class EllipticPDE::DNParamHandler<1>;
+template class EllipticPDE::DNParamHandler<2>;
+template class EllipticPDE::DNParamHandler<3>;
 
 
 namespace ParabolicPDE {

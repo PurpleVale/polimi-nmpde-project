@@ -1,0 +1,24 @@
+# Listing of Parameters
+# ---------------------
+# The relaxation parameter, 1 is no relaxation
+set Relaxation = 1.0
+
+
+subsection Files
+  # A .xml file containing the parameters for the first subdomain
+  set Dirichlet Parameter file = ./dirichlet.xml
+
+  # A .xml file containing the parameters for the second subdomain
+  set Neumann Parameter file   = ./neumann.xml
+end
+
+
+subsection Iteration controls
+  # Max number of iters
+  set Max iters = 100
+
+  # Tolerance for the increment of the Neumann subdomain
+  set Tolerance = 1e-4
+end
+
+

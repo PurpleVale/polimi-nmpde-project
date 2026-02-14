@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ParameterHandler>
+    <Files>
+        <Mesh_20file>
+            <value>./text/meshes/mesh-problem-0.msh</value>
+            <default_value>./mesh.vtk</default_value>
+            <documentation>A .vtk file containing a mesh</documentation>
+            <pattern>5</pattern>
+            <pattern_description>[FileName (Type: input)]</pattern_description>
+        </Mesh_20file>
+        <Output_20file>
+            <value>./text/outputs/dn_test.vtu</value>
+            <default_value>./output.vtk</default_value>
+            <documentation>A .vtk file to save the solution to</documentation>
+            <pattern>6</pattern>
+            <pattern_description>[FileName (Type: output)]</pattern_description>
+        </Output_20file>
+    </Files>
+    <Finite_20Elements>
+        <Elements_20type>
+            <value>Simplex</value>
+            <default_value>Simplex</default_value>
+            <documentation>The finite elements to be used</documentation>
+            <pattern>18</pattern>
+            <pattern_description>[Selection Simplex|Q ]</pattern_description>
+        </Elements_20type>
+        <Polynomial_20degree>
+            <value>2</value>
+            <default_value>2</default_value>
+            <documentation>The polynomial degree of the Elements</documentation>
+            <pattern>17</pattern>
+            <pattern_description>[Integer range 1...7 (inclusive)]</pattern_description>
+        </Polynomial_20degree>
+    </Finite_20Elements>
+    <Functions>
+        <Advection_20x>
+            <value>0.0</value>
+            <default_value>0.0</default_value>
+            <documentation>Advection x coefficient</documentation>
+            <pattern>8</pattern>
+            <pattern_description>[Anything]</pattern_description>
+        </Advection_20x>
+        <Advection_20y>
+            <value>0.0</value>
+            <default_value>0.0</default_value>
+            <documentation>Advection y coefficient</documentation>
+            <pattern>9</pattern>
+            <pattern_description>[Anything]</pattern_description>
+        </Advection_20y>
+        <Advection_20z>
+            <value>0.0</value>
+            <default_value>0.0</default_value>
+            <documentation>Advection z coefficient</documentation>
+            <pattern>10</pattern>
+            <pattern_description>[Anything]</pattern_description>
+        </Advection_20z>
+        <Diffusion>
+            <value>1.0</value>
+            <default_value>1.0</default_value>
+            <documentation>Diffusion coefficient</documentation>
+            <pattern>7</pattern>
+            <pattern_description>[Anything]</pattern_description>
+        </Diffusion>
+        <Dirichlet_20BC>
+            <value>0.0,0.0,0.0</value>
+            <default_value>0.0</default_value>
+            <documentation>Dirichlet Boundary Condition</documentation>
+            <pattern>13</pattern>
+            <pattern_description>[List of &lt;[Anything]&gt; of length 0...4294967295 (inclusive)]</pattern_description>
+        </Dirichlet_20BC>
+        <Dirichlet_20Tags>
+            <value>0,2,3</value>
+            <default_value>0,1</default_value>
+            <documentation>The Tag of the boundaries on which to apply the Dirichlet condition</documentation>
+            <pattern>15</pattern>
+            <pattern_description>[List of &lt;[Integer range 0...9 (inclusive)]&gt; of length 0...4294967295 (inclusive)]</pattern_description>
+        </Dirichlet_20Tags>
+        <Force>
+            <value>1.0</value>
+            <default_value>0.0</default_value>
+            <documentation>Force term</documentation>
+            <pattern>12</pattern>
+            <pattern_description>[Anything]</pattern_description>
+        </Force>
+        <Neumann_20BC/>
+        <Neumann_20Tags/>
+        <Reaction>
+            <value>1.0</value>
+            <default_value>0.0</default_value>
+            <documentation>Reaction coefficient</documentation>
+            <pattern>11</pattern>
+            <pattern_description>[Anything]</pattern_description>
+        </Reaction>
+    </Functions>
+    <Solver>
+        <Max_20iters>
+            <value>1000</value>
+            <default_value>1000</default_value>
+            <documentation>Max number of iters for linear solver</documentation>
+            <pattern>0</pattern>
+            <pattern_description>[Integer range 1...100000 (inclusive)]</pattern_description>
+        </Max_20iters>
+        <Preconditioner>
+            <value>SSOR</value>
+            <default_value>Identity</default_value>
+            <documentation>The type of preconditioner default is none</documentation>
+            <pattern>4</pattern>
+            <pattern_description>[Selection Jacobi|Identity|ILU|ILUT|SSOR ]</pattern_description>
+        </Preconditioner>
+        <Residual_20tolerance>
+            <value>1e-10</value>
+            <default_value>1e-10</default_value>
+            <documentation>Tolerance for the residual of the linear solver</documentation>
+            <pattern>2</pattern>
+            <pattern_description>[Double -MAX_DOUBLE...MAX_DOUBLE (inclusive)]</pattern_description>
+        </Residual_20tolerance>
+        <Solver_20type>
+            <value>CG</value>
+            <default_value>CG</default_value>
+            <documentation>The solver to use</documentation>
+            <pattern>3</pattern>
+            <pattern_description>[Selection CG|GMRES ]</pattern_description>
+        </Solver_20type>
+        <Tolerance>
+            <value>1e-10</value>
+            <default_value>1e-10</default_value>
+            <documentation>Tolerance for the linear solver</documentation>
+            <pattern>1</pattern>
+            <pattern_description>[Double -MAX_DOUBLE...MAX_DOUBLE (inclusive)]</pattern_description>
+        </Tolerance>
+    </Solver>
+</ParameterHandler>

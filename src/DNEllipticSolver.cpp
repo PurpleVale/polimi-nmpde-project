@@ -30,8 +30,10 @@ namespace EllipticPDE{
 
         LOG_VAR("Cells distributed",mesh.n_global_active_cells())
 
+
         Timer timer;
         timer.start();
+
 
         LOG_TITLE("Init FE")
         LOG_VAR("FE type",this->fe_type);
@@ -42,6 +44,7 @@ namespace EllipticPDE{
             fe = std::make_unique<FE_SimplexP<dim>>(this->poly_deg);
         }
         LOG_VAR("DoF of FE",fe->dofs_per_cell);
+
 
         LOG_TITLE("Init Quadrature")
         LOG_VAR("Quadrature points",this->poly_deg + 1)
@@ -55,11 +58,24 @@ namespace EllipticPDE{
         LOG_VAR("Quadrature points/cells",quadrature->size());
         LOG_VAR("Quadrature points/cells on boundaries",boundary_quadrature->size());
 
+
         LOG_TITLE("Init DoF")
         dof_handler.reinit(mesh);
         dof_handler.distribute_dofs(*fe);
         locally_owned_dofs = dof_handler.locally_owned_dofs();
         LOG_VAR("number of DoFs",dof_handler.n_dofs())
+
+
+        LOG_TITLE("Computing Support points")
+        std::unique_ptr<FiniteElement<dim>> fe_linear;
+        if (this->fe_type == "Q") {
+            fe_linear = std::make_unique<FE_Q<dim>>(1);
+        } else {
+            fe_linear = std::make_unique<FE_SimplexP<dim>>(1);
+        }
+        MappingFE mapping(*fe_linear);
+        support_points = DoFTools::map_dofs_to_support_points(mapping, dof_handler);
+
 
         LOG_TITLE("Init Algebraic structure")
         LOG_TITLE("Creating Sparsity Pattern")
@@ -114,8 +130,9 @@ namespace EllipticPDE{
             dofs_per_cell,
             dofs_per_cell
             );
-        stiff_local = 0.0; // make sure it's empty
         Vector<double> rhs_local(dofs_per_cell);
+
+        stiff_local = 0.0; // make sure it's empty
         rhs_local = 0.0; // make sure it's empty
 
         // map to global indices
@@ -319,7 +336,7 @@ namespace EllipticPDE{
     }
 
     template<int dim>
-    void DNEllipticSolver<dim>::output() const {
+    void DNEllipticSolver<dim>::output(const unsigned int &iter) const {
 
         LOG_TITLE("Synchronizing with other processors")
         const IndexSet locally_relevant_dofs = DoFTools::extract_locally_relevant_dofs(dof_handler);
@@ -354,12 +371,108 @@ namespace EllipticPDE{
         LOG_VAR("Opening Files Named", output_name)
         String out_file = d_o.write_vtu_with_pvtu_record(
             output_dir + "/",
-            output_name,
-            0,
+            output_name+(domain_id?"_neumann_":"_dirichlet_"),
+            iter,
             MPI_COMM_WORLD
         );
         LOG_TITLE("Successful Write")
         LOG_VAR("Logs written to",out_file)
+    }
+
+    template<int dim>
+    void DNEllipticSolver<dim>::apply_interface_dirichlet(const DNEllipticSolver &other) {
+        // retrieving map between the two domains DoF
+        const auto interface_map = compute_interface_map(other);
+
+        // get boundary values from the other solution
+        BoundaryMap boundary_values;
+        for (const auto &dof : interface_map)
+            boundary_values[dof.first] = other.sol[dof.second];
+
+        LOG_TITLE("Applying Dirichlet Interface conditions")
+        MatrixTools::apply_boundary_values(
+            boundary_values,
+            stiff,
+            sol,
+            rhs,
+            false
+        );
+    }
+
+    template<int dim>
+    void DNEllipticSolver<dim>::apply_interface_neumann(DNEllipticSolver &other) {
+        // retrieving map between the two domains DoF
+        const auto interface_map = compute_interface_map(other);
+
+        LOG_TITLE("Applying Neumann Interface conditions")
+        // computing normal derivative at the interface is hard
+        // we compute the interface residual instead
+        other.assemble();
+        // r = b_other
+        DVector residual = other.rhs;
+        // r = -b_other
+        residual *= -1;
+        // r = -b_other + A*u_other
+        other.stiff.vmult_add(residual, other.sol);
+
+        // transfer residual to this system
+        for (const auto &dof : interface_map)
+            rhs[dof.first] -= residual[dof.second];
+    }
+
+    template<int dim>
+    const typename DNEllipticSolver<dim>::DVector& DNEllipticSolver<dim>::get_solution() const {
+        return sol;
+    }
+
+    template<int dim>
+    void DNEllipticSolver<dim>::apply_relaxation(const DVector&old_solution, const double &lambda) {
+        // first call apply_interface_dirichlet (u1 = u2) and save the old u (u1)
+        // u1 = λu2 + (1-λ)u1
+        sol *= lambda;
+        sol.add(1.0-lambda, old_solution);
+    }
+
+    template<int dim>
+    typename DNEllipticSolver<dim>::IndexMap DNEllipticSolver<dim>::compute_interface_map(
+        const DNEllipticSolver &other
+    ) const {
+        // Retrieve interface DoFs on the current and other subdomain.
+        const std::set<types::boundary_id> boundary_ids = {domain_id == 0u? 1u:0u};
+         const std::set<types::boundary_id> other_boundary_ids = {domain_id == 0u? 0u:1u};
+
+        IndexSet interface_dofs = DoFTools::extract_boundary_dofs(
+            dof_handler,
+            ComponentMask(),
+            boundary_ids
+        );
+        IndexSet other_interface_dofs = DoFTools::extract_boundary_dofs(
+            other.dof_handler,
+            ComponentMask(),
+            other_boundary_ids
+        );
+
+        // compute mapping for each of our dof
+        IndexMap interface_map;
+        for (const auto &curr_dof : interface_dofs) {
+            const Point<dim> &p = support_points.at(curr_dof);
+
+            // finding the nearest point in the other subdomain
+            types::global_dof_index nearest = *other_interface_dofs.begin();
+            for (const auto &other_dof : other_interface_dofs) {
+                const auto new_p = other.support_points.at(other_dof);
+                const auto nearest_p = other.support_points.at(nearest);
+
+                if (p.distance_square(new_p) < p.distance_square(nearest_p)) {
+                    nearest = other_dof;
+                }
+            }
+
+            // for each of our dof we map it to the closest of the other system
+            interface_map[curr_dof] = nearest;
+        }
+
+        return interface_map;
     }
 
     template<int dim>

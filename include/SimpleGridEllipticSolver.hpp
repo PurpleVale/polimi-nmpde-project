@@ -8,7 +8,6 @@ namespace EllipticPDE{
     using namespace dealii;
 
     constexpr auto dim = 1;
-    constexpr auto N_elm = 50;
     class SimpleGridEllipticSolver : public EllipticParamHandler<dim>{
 
     public:
@@ -17,9 +16,10 @@ namespace EllipticPDE{
         using BoundaryIds  = types::boundary_id;
         using BoundaryFunctionMap = std::map<types::boundary_id, const Function<dim> *>;
 
-        SimpleGridEllipticSolver() :
+        SimpleGridEllipticSolver(unsigned int N_elm = 10) :
             EllipticParamHandler<dim>(),
             mesh(MPI_COMM_WORLD),
+            N_elm(N_elm),
             mpi_size(Utilities::MPI::n_mpi_processes(MPI_COMM_WORLD)),
             mpi_rank(Utilities::MPI::this_mpi_process(MPI_COMM_WORLD)),
             pcout(std::cout, mpi_rank == 0)
@@ -47,6 +47,8 @@ namespace EllipticPDE{
         TrilinosWrappers::MPI::Vector sol;
 
         IndexSet locally_owned_dofs;
+
+        unsigned int N_elm;
 
         const unsigned int mpi_size;
         const unsigned int mpi_rank;

@@ -165,7 +165,7 @@ namespace ParabolicPDE{
                         // θ*A
                         stiff_local(i,j) += this->theta * (
                               (diffusion * scalar_product(fe_v.shape_grad(i,q), fe_v.shape_grad(j,q)))
-                            + (advection * fe_v.shape_grad(i,q) * fe_v.shape_value(j,q))
+                            + (scalar_product(advection,fe_v.shape_grad(i,q)) * fe_v.shape_value(j,q))
                             + (reaction * fe_v.shape_value(i,q) * fe_v.shape_value(j,q))
                             ) *  fe_v.JxW(q);
                     }
@@ -179,14 +179,14 @@ namespace ParabolicPDE{
                     // (1-θ)*A
                     rhs_local(i) -= (1.0 - this->theta) * (
                           (diffusion * scalar_product(fe_v.shape_grad(i,q), sol_old_grads[q]))
-                        + (advection * fe_v.shape_grad(i,q) * sol_old_values[q])
-                        + (reaction * fe_v.shape_value(i,q) * sol_old_values[q])
+                        + (scalar_product(advection, sol_old_grads[q]) * fe_v.shape_value(i,q))
+                        + (reaction  * sol_old_values[q] * fe_v.shape_value(i,q))
                         ) *  fe_v.JxW(q);
 
                     // θF + (1-θ)F
                     rhs_local(i) += (
-                        this->theta * curr_force+
-                        (1.0-this->theta) * old_force
+                        (this->theta * curr_force) +
+                        ((1.0-this->theta) * old_force)
                         ) * fe_v.shape_value(i,q) * fe_v.JxW(q);
 
                 }
@@ -333,7 +333,7 @@ namespace ParabolicPDE{
                         // θ*A
                         stiff_local(i,j) += this->theta * (
                               (diffusion * fe_v.shape_grad(i,q) * fe_v.shape_grad(j,q))
-                            + (advection * fe_v.shape_grad(i,q) * fe_v.shape_value(j,q))
+                            + (scalar_product(advection, fe_v.shape_grad(j,q)) * fe_v.shape_value(i,q))
                             + (reaction * fe_v.shape_value(i,q) * fe_v.shape_value(j,q))
                             ) *  fe_v.JxW(q);
                     }
@@ -427,8 +427,8 @@ namespace ParabolicPDE{
 
                    // (1-θ)*A
                    rhs_local(i) -= (1.0 - this->theta) * (
-                         (diffusion * fe_v.shape_grad(i,q) * sol_old_grads[q])
-                       + (advection * fe_v.shape_grad(i,q) * sol_old_values[q])
+                         (diffusion * scalar_product(fe_v.shape_grad(i,q), sol_old_grads[q]))
+                       + (scalar_product(advection, sol_old_grads[q]) * fe_v.shape_value(i,q))
                        + (reaction * fe_v.shape_value(i,q) * sol_old_values[q])
                        ) *  fe_v.JxW(q);
 
@@ -437,7 +437,6 @@ namespace ParabolicPDE{
                        (this->theta * curr_force) +
                        ((1.0-this->theta) * old_force)
                        ) * fe_v.shape_value(i,q) * fe_v.JxW(q);
-
                }
            }
 
@@ -636,8 +635,13 @@ namespace ParabolicPDE{
     }
 
     double SimpleGridParabolicSolver::run(const String &parameter_filename) {
+
+        sol = 0;
+
         Timer timer;
         timer.start();
+
+        const bool print_iter = true;
 
         auto set_up_time = setup(parameter_filename);
         LOG_ANY("Setup time: {:0.4f}s", set_up_time);
@@ -669,6 +673,8 @@ namespace ParabolicPDE{
         while (curr_time < (T - 0.5*dt)) {
             curr_time += dt;
             ++curr_time_step;
+            if (print_iter)
+                pcout << fmt::format("{:<90}",fmt::format("{} == {}/{}","Starting Time step", curr_time_step,expected_steps)) << std::endl;
 
             LOG_VAR("Starting Time step", curr_time_step)
             assemble_time = assemble_rhs();

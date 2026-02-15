@@ -40,7 +40,7 @@ namespace NavierStokesPDE {
 
         protected:
             double x_expr(const Point<dim> &p) const {
-                return 0.0;
+                return 1.0 + std::sin(p[0])*std::sin(p[0]);
             }
             double y_expr(const Point<dim> &p) const {
                 return 0.0;
@@ -102,7 +102,7 @@ namespace NavierStokesPDE {
 
             protected:
             double x_expr(const Point<dim> &p) const {
-                return -1*p[1]*(2.0-p[1])*(1.0-p[2])*(2.0-p[2]);
+                return 0.0;
             }
             double y_expr(const Point<dim> &p) const {
                 return 0.0;
@@ -163,12 +163,12 @@ namespace NavierStokesPDE {
             }
 
             double scalar_value() const {
-                return -10;
+                return 0.0;
             }
 
             protected:
             double x_expr(const Point<dim> &p) const {
-                return -10; // -pout = -1 * 10 [Pa]
+                return 0.0; // -p_out [Pa]
             }
             double y_expr(const Point<dim> &p) const {
                 return 0.0;
@@ -198,12 +198,12 @@ namespace NavierStokesPDE {
             }
 
             double scalar_value() const {
-                return -10;
+                return 0.0;
             }
 
             protected:
             double x_expr(const Point<dim> &p) const {
-                return -1*p[1]*(2.0-p[1])*(1.0-p[2])*(2.0-p[2]);
+                return 0.0;
             }
             double y_expr(const Point<dim> &p) const {
                 return 0.0;

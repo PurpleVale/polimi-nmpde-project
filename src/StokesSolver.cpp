@@ -240,12 +240,12 @@ namespace NavierStokesPDE{
                 for (unsigned int face_id = 0 ; face_id < cell->n_faces(); ++face_id) {
                     auto face = cell->face(face_id);
                     auto tag = face->boundary_id();
-                    if (face->at_boundary() && (tag == 2 /* && other tags*/)) {
+                    if (face->at_boundary() && (tag == 0 || tag == 1 /* && other tags*/)) {
                         fe_f_v.reinit(cell,face_id);
                         for (unsigned int q=0; q<n_q_face; ++q) {
                             for (unsigned int i = 0; i<dofs_per_cell; ++i) {
                                 rhs_local(i) +=
-                                    n_bc_0.scalar_value() *
+                                    (tag == 0 ? n_bc_0.scalar_value() : n_bc_1.scalar_value()) *
                                     scalar_product(
                                         fe_f_v.normal_vector(q),
                                         fe_f_v[vel].value(i,q)
@@ -281,24 +281,25 @@ namespace NavierStokesPDE{
         // turn of dimension 4 (3 starting from 0)
         mask_velocity.set(dim, false);
 
-        boundary_functions[0] = &d_bc_0;
+        // boundary_functions[0] = &d_bc_0;
         // boundary_functions[1] = &d_bc_1;
         // boundary_functions[2] = &d_bc_2;
         // ...
 
         // populate map boundary_vals
-        VectorTools::interpolate_boundary_values(
-            dof_handler,
-            boundary_functions,
-            boundary_vals,
-            mask_velocity
-        );
+        // VectorTools::interpolate_boundary_values(
+        //     dof_handler,
+        //     boundary_functions,
+        //     boundary_vals,
+        //     mask_velocity
+        // );
 
         LOG_TITLE("Applying Wall Conditions")
         // wall conditions (aka homogeneous dirichlet) should go last
         boundary_functions.clear();
         Functions::ZeroFunction<dim> zero(dim+1);
-        boundary_functions[1] = &zero;
+        boundary_functions[2] = &zero;
+        boundary_functions[3] = &zero;
 
         // populate map boundary_vals
         VectorTools::interpolate_boundary_values(

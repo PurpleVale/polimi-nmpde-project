@@ -169,8 +169,8 @@ namespace EllipticPDE{
                                     fe_v.shape_grad(j,q)
                                 ) + (
                                     advection_tensor *
-                                    fe_v.shape_grad(i,q) *
-                                    fe_v.shape_value(j,q)
+                                    fe_v.shape_grad(j,q) *
+                                    fe_v.shape_value(i,q)
                                 ) + (
                                     this->reaction_c.value(x_q) *
                                     fe_v.shape_value(i,q) *
@@ -371,7 +371,7 @@ namespace EllipticPDE{
         LOG_VAR("Opening Files Named", output_name)
         String out_file = d_o.write_vtu_with_pvtu_record(
             output_dir + "/",
-            output_name+(domain_id?"_neumann_":"_dirichlet_"),
+            output_name+(domain_id?"_neumann":"_dirichlet"),
             iter,
             MPI_COMM_WORLD
         );

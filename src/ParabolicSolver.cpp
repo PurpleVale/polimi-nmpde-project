@@ -171,7 +171,7 @@ namespace ParabolicPDE{
                         // θ*A
                         stiff_local(i,j) += this->theta * (
                               (diffusion * scalar_product(fe_v.shape_grad(i,q), fe_v.shape_grad(j,q)))
-                            + (advection * fe_v.shape_grad(i,q) * fe_v.shape_value(j,q))
+                            + (advection * fe_v.shape_grad(j,q) * fe_v.shape_value(i,q))
                             + (reaction * fe_v.shape_value(i,q) * fe_v.shape_value(j,q))
                             ) *  fe_v.JxW(q);
                     }
@@ -185,7 +185,7 @@ namespace ParabolicPDE{
                     // (1-θ)*A
                     rhs_local(i) -= (1.0 - this->theta) * (
                           (diffusion * scalar_product(fe_v.shape_grad(i,q), sol_old_grads[q]))
-                        + (advection * fe_v.shape_grad(i,q) * sol_old_values[q])
+                        + (advection * fe_v.shape_value(i,q) * sol_old_grads[q])
                         + (reaction * fe_v.shape_value(i,q) * sol_old_values[q])
                         ) *  fe_v.JxW(q);
 
@@ -340,7 +340,7 @@ namespace ParabolicPDE{
                         // θ*A
                         stiff_local(i,j) += this->theta * (
                               (diffusion * fe_v.shape_grad(i,q) * fe_v.shape_grad(j,q))
-                            + (advection * fe_v.shape_grad(i,q) * fe_v.shape_value(j,q))
+                            + (advection * fe_v.shape_grad(j,q) * fe_v.shape_value(i,q))
                             + (reaction * fe_v.shape_value(i,q) * fe_v.shape_value(j,q))
                             ) *  fe_v.JxW(q);
                     }
@@ -436,7 +436,7 @@ namespace ParabolicPDE{
                    // (1-θ)*A
                    rhs_local(i) -= (1.0 - this->theta) * (
                          (diffusion * fe_v.shape_grad(i,q) * sol_old_grads[q])
-                       + (advection * fe_v.shape_grad(i,q) * sol_old_values[q])
+                       + (advection * sol_old_grads[q] * fe_v.shape_value(i,q))
                        + (reaction * fe_v.shape_value(i,q) * sol_old_values[q])
                        ) *  fe_v.JxW(q);
 

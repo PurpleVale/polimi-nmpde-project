@@ -85,6 +85,12 @@ target_link_libraries(test_s_ell fmt::fmt param_handler simple_elliptic_solver)
 add_executable(test_s_par test/test_simple_parabolic.cpp)
 deal_ii_setup_target(test_s_par)
 target_link_libraries(test_s_par fmt::fmt param_handler simple_parabolic_solver)
+
+add_executable(test_par_conv test/conv_test_parabolic.cpp)
+deal_ii_setup_target(test_par_conv)
+target_link_libraries(test_par_conv fmt::fmt param_handler simple_parabolic_solver)
+
+
 ##############################################
 #              My Executables                #
 ##############################################
@@ -92,11 +98,11 @@ target_link_libraries(test_s_par fmt::fmt param_handler simple_parabolic_solver)
 ##############################################
 #                    Labs                    #
 ##############################################
-include(labs/L01/CMakeLists.txt)
-include(labs/L02/CMakeLists.txt)
-include(labs/L03/CMakeLists.txt)
-include(labs/L04/CMakeLists.txt)
-include(labs/L05/CMakeLists.txt)
-include(labs/L06/CMakeLists.txt)
-include(labs/L07/CMakeLists.txt)
-include(labs/L08/CMakeLists.txt)
+#include(labs/L01/CMakeLists.txt)
+#include(labs/L02/CMakeLists.txt)
+#include(labs/L03/CMakeLists.txt)
+#include(labs/L04/CMakeLists.txt)
+#include(labs/L05/CMakeLists.txt)
+#include(labs/L06/CMakeLists.txt)
+#include(labs/L07/CMakeLists.txt)
+#include(labs/L08/CMakeLists.txt)

@@ -152,8 +152,8 @@ namespace EllipticPDE{
                                     fe_v.shape_grad(j,q)
                                 ) + (
                                     advection_tensor *
-                                    fe_v.shape_grad(i,q) *
-                                    fe_v.shape_value(j,q)
+                                    fe_v.shape_grad(j,q) *
+                                    fe_v.shape_value(i,q)
                                 ) + (
                                     this->reaction_c.value(x_q) *
                                     fe_v.shape_value(i,q) *

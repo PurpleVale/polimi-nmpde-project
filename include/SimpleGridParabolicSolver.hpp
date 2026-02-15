@@ -8,7 +8,6 @@ namespace ParabolicPDE{
     using namespace dealii;
 
     constexpr auto dim = 1;
-    constexpr auto N_elm = 40;
     class SimpleGridParabolicSolver : public ParabolicParamHandler<dim>{
 
     public:
@@ -17,9 +16,10 @@ namespace ParabolicPDE{
         using BoundaryIds  = types::boundary_id;
         using BoundaryFunctionMap = std::map<types::boundary_id, const Function<dim> *>;
 
-        SimpleGridParabolicSolver() :
+        SimpleGridParabolicSolver(unsigned int N_elm = 10) :
             ParabolicParamHandler<dim>(),
             mesh(MPI_COMM_WORLD),
+            N_elm(N_elm),
             mpi_size(Utilities::MPI::n_mpi_processes(MPI_COMM_WORLD)),
             mpi_rank(Utilities::MPI::this_mpi_process(MPI_COMM_WORLD)),
             pcout(std::cout, mpi_rank == 0)
@@ -55,6 +55,7 @@ namespace ParabolicPDE{
 
         double curr_time;
         unsigned int curr_time_step;
+        unsigned int N_elm;
 
         const unsigned int mpi_size;
         const unsigned int mpi_rank;

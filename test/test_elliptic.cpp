@@ -9,7 +9,7 @@ int main(int argc , char** argv ) {
     unsigned int mpi_rank(dealii::Utilities::MPI::this_mpi_process(MPI_COMM_WORLD));
     dealii::ConditionalOStream pcout(std::cout, mpi_rank == 0);
 
-    EllipticPDE::EllipticSolver<3> solver;
+    EllipticPDE::EllipticSolver<2> solver;
     solver.print_parameters("./text/parameters/elliptic_solver.prm");
     solver.print_editable_parameters("./text/parameters/elliptic_solver.xml");
     pcout << "================ " << fmt::format("{:^45}","STARTING TEST") << " ================" <<std::endl;

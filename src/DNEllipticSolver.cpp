@@ -9,13 +9,22 @@ namespace EllipticPDE{
     double DNEllipticSolver<dim>::setup(String parameter_filename) {
         this->init(parameter_filename);
 
-        LOG_TITLE("Reading Grid Serially")
         Triangulation<dim> non_parallel_mesh;
-        GridIn<dim> grid_input;
-        grid_input.attach_triangulation(non_parallel_mesh);
 
-        std::ifstream mesh_file(this->mesh_filename);
-        grid_input.read_msh(mesh_file);
+        if (this->mesh_filename != "simple") {
+            LOG_TITLE("Reading Grid Serially")
+            GridIn<dim> grid_input;
+            grid_input.attach_triangulation(non_parallel_mesh);
+
+            std::ifstream mesh_file(this->mesh_filename);
+            grid_input.read_msh(mesh_file);
+        } else {
+            LOG_TITLE("Creating Grid")
+            double gamma = 0.75;
+            double a = domain_id == 0 ? 0 : gamma;
+            double b = domain_id == 0 ? gamma : 1;
+            GridGenerator::subdivided_hyper_cube(non_parallel_mesh, 40, a, b, true);
+        }
 
         LOG_VAR("Cells",non_parallel_mesh.n_active_cells())
 

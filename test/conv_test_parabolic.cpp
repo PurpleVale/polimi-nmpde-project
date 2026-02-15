@@ -1,18 +1,19 @@
 #include <Generics.hpp>
 #include <PDEParamsHandler.hpp>
-#include <SimpleGridParabolicSolver.hpp>
+#include <ParabolicSolver.hpp>
 
-class Exact : public dealii::Function<1> {
+class Exact : public dealii::Function<2> {
 
     public:
     Exact() {};
 
-     virtual double value(const dealii::Point<1> &p,const unsigned int = 0) const override {
-         return std::sin(M_PI*p[0]/2);
+     virtual double value(const dealii::Point<2> &p,const unsigned int = 0) const override {
+         return 0;
      }
-    virtual dealii::Tensor<1, 1> gradient(const dealii::Point<1> &p, const unsigned int = 0) const override {
-         dealii::Tensor<1, 1> grad;
-         grad[0] = (M_PI/2) * std::cos(M_PI*p[0]/2);
+    virtual dealii::Tensor<1, 2> gradient(const dealii::Point<2> &p, const unsigned int = 0) const override {
+         dealii::Tensor<1, 2> grad;
+         grad[0] = 0;
+         grad[1] = 0;
          return grad;
      }
 };
@@ -28,13 +29,13 @@ int main(int argc , char** argv ) {
     dealii::ConditionalOStream pcout(std::cout, mpi_rank == 0);
 
     Exact exact;
-    ParabolicPDE::SimpleGridParabolicSolver solver(10);
+    ParabolicPDE::ParabolicSolver<2> solver;
     dealii::ConvergenceTable table;
 
-    solver.init("./text/parameters/test_params/parabolic_solver_test.xml");
+    solver.init("./text/parameters/parabolic.prm");
     for (auto dt : dts) {
         solver.time_step = dt;
-        solver.run("./text/parameters/test_params/parabolic_solver_test.xml");
+        solver.run("./text/parameters/parabolic.prm");
         std::cout << "dt=" << solver.time_step << std::endl;
         auto L2 = solver.compare_solution(dealii::VectorTools::L2_norm,exact);
         auto H1 = solver.compare_solution(dealii::VectorTools::H1_norm,exact);

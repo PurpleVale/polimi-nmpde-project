@@ -10,10 +10,12 @@ int main(int argc , char** argv ) {
     dealii::ConditionalOStream pcout(std::cout, mpi_rank == 0);
 
     EllipticPDE::DNSolver<1> solver;
-    solver.print_parameters("./text/parameters/dn_solver.prm");
-    solver.print_editable_parameters("./text/parameters/dn_solver.xml");
+
+    // solver.print_parameters("./text/parameters/prm/dn_solver.prm");
+    // solver.print_editable_parameters("./text/parameters/xml/dn_solver.xml");
+
     pcout << "================ " << fmt::format("{:^45}","STARTING TEST") << " ================" <<std::endl;
-    double setup_time = solver.setup("./text/parameters/test_params/dn_test.xml");
+    double setup_time = solver.setup("./text/parameters/dn.prm");
     double solve_time = solver.solve();
     pcout << fmt::format("{:<79}",fmt::format("Setup time: {:0.3f}s",setup_time)) <<std::endl;
     pcout << fmt::format("{:<79}",fmt::format("Solve time: {:0.3f}s",solve_time)) <<std::endl;

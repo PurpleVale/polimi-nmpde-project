@@ -6,6 +6,8 @@
 /***********************************************/
 //this is bad programming but it's fine
 
+#include <deal.II/base/convergence_table.h>
+
 #include <deal.II/dofs/dof_handler.h>
 #include <deal.II/dofs/dof_renumbering.h>
 #include <deal.II/dofs/dof_tools.h>
